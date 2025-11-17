@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Tiro Parabólico</title>
+<style>
+  body { background: #111; color: white; font-family: Arial; margin: 0; overflow: hidden; }
+  #controls { margin-bottom: 20px; }
+  label { margin-right: 10px; }
+  canvas { background: #222; border: 1px solid #555; }
+  #bola{ 
+    background-color: red; 
+    width: 40px; 
+    height: 40px; 
+    border-radius: 50%; 
+    position: absolute; 
+  }
+</style>
+</head>
+<body>
+
+<h2 style="position: absolute; z-index: 10; margin: 10px;">Tiro Parabólico</h2>
+<div id="bola"></div>
+
+<script>
+let bola = document.getElementById("bola");
+let posX = 0;
+let posY = window.innerHeight - 60; 
+let g = 980; // Gravedad en píxeles/segundo²
+let velH = 8 * 100 ;
+let angulo = 60 * Math.PI/180;
+let velY = -Math.sin(angulo) * velH; // Velocidad inicial hacia arriba en píxeles/segundo
+let velX = Math.cos(angulo) * velH;
+let dt = 0.016; // Delta tiempo en segundos (60 FPS)
+
+bola.style.left = posX + "px";
+bola.style.top = posY + "px";
+
+const mover = () => {
+    // Actualizar velocidad con gravedad
+    velY = velY + g * dt;
+    // Actualizar posición
+    posY = posY + velY * dt;
+    posX = posX + velX * dt;
+
+    // Verificar si toca el suelo
+    if (posY >= window.innerHeight - 50) {
+        posY = window.innerHeight - 50;
+        velX = 0;
+        // velY = -velY * 0.75; // Rebote con pérdida de energía
+        // velX = velX * 0.5;
+        // // Si la velocidad es muy baja, paro la bola 
+        // if (Math.abs(velY) < 50) {
+        //     velY = 0;
+        // }
+    }
+
+    bola.style.left = posX + "px";
+    bola.style.top = posY + "px";
+}
+
+setInterval(mover, 16); // 60 FPS
+
+</script>
+
+</body>
+</html>
