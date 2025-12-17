@@ -122,21 +122,24 @@
     #info span {
       font-weight: bold;
     }
-
-    /* Media queries para tablets */
-    @media (max-width: 768px) {
-      h2 {
-        font-size: 1.3rem;
-      }
-
-      #controles {
-        max-width: 280px;
+    /* Esto compensa el initial-scale pequeño que pusiste en JS */
+    @media screen and (max-device-width: 768px) {
+      #controles, #info, h2 {
+        /* Multiplicamos el tamaño por el ratio de píxeles del móvil (habitualmente 2 o 3) */
+        transform: scale(2); 
+        transform-origin: top left; /* Para que no se desplacen al crecer */
       }
 
       #info {
-        max-width: 200px;
-        font-size: 0.75rem;
-        padding: 8px;
+        transform-origin: top right; /* El info crece hacia la izquierda */
+        top: 100%;
+        right: 10px;
+      }
+
+      /* Añadimos margen para que los elementos no se solapen al ser más grandes */
+      #controles {
+        margin-top: 40px; 
+        width: 350px !important; /* Ancho fijo para que no ocupe toda la pantalla escalada */
       }
     }
 
