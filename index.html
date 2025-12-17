@@ -1,87 +1,190 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<title>Tiro Parabólico</title>
-<style>
-  body { background: #111; color: white; font-family: Arial; margin: 0; overflow: hidden; }
-  #controls { margin-bottom: 20px; }
-  label { margin-right: 10px; }
-  canvas { background: #222; border: 1px solid #555; }
-  #bola{ 
-    background-color: red; 
-    width: 40px; 
-    height: 40px; 
-    border-radius: 50%; 
-    position: absolute; 
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Tiro Parabólico</title>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: Arial;
+      margin: 0;
+      overflow-x: scroll;
+      overflow-y: hidden;
+    }
+
+    canvas {
+      background: #222;
+      border: 1px solid #555;
+    }
+
+    #bola {
+      background-color: red;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      position: absolute;
+    }
+
+    #info {
+      margin-top: 20px;
+      background-color: rgba(248, 248, 255, 0.15);
+      border: 1px solid grey;
+      padding: 10px;
+      border-radius: 5px;
+      width: auto;
+      max-width: 300px;
+    }
+
+    #info p {
+      margin: 0;
+    }
+
+    #info span {
+      font-weight: bold;
+    }
+  </style>
 </head>
+
 <body>
 
-<h2 style="z-index: 10; margin: 10px;">Tiro Parabólico</h2>
-<div id="bola"></div>
-<div id="controles">
+  <h2 style="z-index: 10; margin: 10px;">Tiro Parabólico</h2>
+  <div id="bola"></div>
+
+  <div id="controles">
     <label>Velocidad inicial</label>
     <input type="text" id="velocidadInicial" placeholder="5 m/s">
-    <label>Angulo</label>
+    <label>Ángulo</label>
     <input type="text" placeholder="20 grados" id="angulo">
     <label>Gravedad</label>
     <input type="text" placeholder="9.8 m/s²" id="gravedad">
     <input type="button" value="Shoot 🔥" id="dispararClick">
-</div>
+  </div>
 
-<script>
-let bola = document.getElementById("bola");
-let posX = 0;
-let posY = window.innerHeight - 60; 
-let g = 980; // Gravedad en píxeles/segundo²
-let velH = 8 * 100 ;
-let angulo = 60 * Math.PI/180;
-let velY = -Math.sin(angulo) * velH; // Velocidad inicial hacia arriba en píxeles/segundo
-let velX = Math.cos(angulo) * velH;
-let dt = 0.016; // Delta tiempo en segundos (60 FPS)
+  <div id="info">
+    <p>Velocidad inicial: <span id="velocidadInicialInfo">0</span> m/s</p>
+    <p>Ángulo: <span id="anguloInfo">0</span> grados</p>
+    <p>Gravedad: <span id="gravedadInfo">0</span> m/s²</p>
+    <p>Distancia: <span id="distanciaInfo">0</span> m</p>
+    <p>Altura máxima: <span id="alturaMaximaInfo">0</span> m</p>
+    <p>Tiempo de vuelo: <span id="tiempoVueloInfo">0</span> s</p>
+    <p>Escala metros/píxel: <span id="escalaInfo">0</span></p>
+  </div>
 
-bola.style.left = posX + "px";
-bola.style.top = posY + "px";
+  <script>
+    let bola = document.getElementById("bola");
 
+    let escalaMetro = 40 * 2;
 
+    let velH;
+    let angulo;
+    let g;
+    let posX;
+    let posY;
+    let velY;
+    let velX;
 
-const disparar = () => {
-    g = document.getElementById("gravedad") * 100;
-    velH = document.getElementById("velocidadInicial") * 100;
-    angulo = document.getElementById("angulo");
-    let velY = -Math.sin(angulo) * velH; // Velocidad inicial hacia arriba en píxeles/segundo
-    let velX = Math.cos(angulo) * velH;
-    setInterval(mover, 16); // 60 FPS
-}
+    let animId = null; // para requestAnimationFrame
+    let lastTime = null;
 
-const mover = () => {
-    // Actualizar velocidad con gravedad
-    velY = velY + g * dt;
-    // Actualizar posición
-    posY = posY + velY * dt;
-    posX = posX + velX * dt;
+    const actualizarInfo = () => {
+      document.getElementById("velocidadInicialInfo").textContent = (velH / escalaMetro).toFixed(2);
+      document.getElementById("anguloInfo").textContent = (angulo * 180 / Math.PI).toFixed(2);
+      document.getElementById("gravedadInfo").textContent = (g / escalaMetro).toFixed(2);
+      document.getElementById("distanciaInfo").textContent = (posX / escalaMetro).toFixed(2);
+      document.getElementById("escalaInfo").textContent = "1m = " + escalaMetro.toFixed(2) + "px";
+    };
 
-    // Verificar si toca el suelo
-    if (posY >= window.innerHeight - 50) {
-        posY = window.innerHeight - 50;
+    const calcularTiempoVuelo = () => {
+      const groundY = window.innerHeight - 50;
+      const y0 = posY;
+      const v0y = velY;
+
+      const a = 0.5 * g;
+      const b = v0y;
+      const c = y0 - groundY;
+
+      const disc = b * b - 4 * a * c;
+      if (disc < 0) return;
+
+      const t1 = (-b + Math.sqrt(disc)) / (2 * a);
+      const t2 = (-b - Math.sqrt(disc)) / (2 * a);
+      const t = Math.max(t1, t2);
+
+      document.getElementById("tiempoVueloInfo").textContent = t.toFixed(2);
+    };
+
+    const calcularAlturaMaxima = () => {
+      const Vy = velH * Math.sin(angulo);
+      const h = Vy * Vy / (2 * g);
+      document.getElementById("alturaMaximaInfo").textContent = (h / escalaMetro).toFixed(2);
+    };
+
+    const valoresIniciales = () => {
+      velH = 5 * escalaMetro;
+      angulo = 20 * Math.PI / 180;
+      g = 9.8 * escalaMetro;
+      posX = 0;
+      posY = window.innerHeight - 60;
+      velY = -Math.sin(angulo) * velH;
+      velX = Math.cos(angulo) * velH;
+      actualizarInfo();
+      bola.style.left = posX + "px";
+      bola.style.top = posY + "px";
+    };
+    valoresIniciales();
+
+    const mover = (timestamp) => {
+      if (!lastTime) lastTime = timestamp;
+      const dt = (timestamp - lastTime) / 1000;
+      lastTime = timestamp;
+
+      velY += g * dt;
+      posY += velY * dt;
+      posX += velX * dt;
+
+      const suelo = window.innerHeight - 50;
+      if (posY >= suelo) {
+        posY = suelo;
         velX = 0;
-        // velY = -velY * 0.75; // Rebote con pérdida de energía
-        // velX = velX * 0.5;
-        // // Si la velocidad es muy baja, paro la bola 
-        // if (Math.abs(velY) < 50) {
-        //     velY = 0;
-        // }
-    }
+        velY = 0;
+        animId = null;
+        return;
+      }
 
-    bola.style.left = posX + "px";
-    bola.style.top = posY + "px";
-}
+      actualizarInfo();
+      bola.style.left = posX + "px";
+      bola.style.top = posY + "px";
 
-document.getElementById("dispararClick").addEventListener("click", disparar);
+      animId = requestAnimationFrame(mover);
+    };
 
-</script>
+    const disparar = () => {
+      valoresIniciales();
+      lastTime = null;
+
+      const gInput = parseFloat(document.getElementById("gravedad").value);
+      const angInput = parseFloat(document.getElementById("angulo").value);
+      const velInput = parseFloat(document.getElementById("velocidadInicial").value);
+
+      if (!isNaN(gInput)) g = gInput * escalaMetro;
+      if (!isNaN(angInput)) angulo = angInput * Math.PI / 180;
+      if (!isNaN(velInput)) velH = velInput * escalaMetro;
+
+      velY = -Math.sin(angulo) * velH;
+      velX = Math.cos(angulo) * velH;
+
+      calcularAlturaMaxima();
+      calcularTiempoVuelo();
+
+      if (animId) cancelAnimationFrame(animId);
+      animId = requestAnimationFrame(mover);
+    };
+
+    document.getElementById("dispararClick").addEventListener("click", disparar);
+  </script>
 
 </body>
+
 </html>
