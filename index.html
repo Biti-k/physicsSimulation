@@ -3,20 +3,32 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tiro Parabólico</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       background: #111;
       color: white;
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       margin: 0;
-      overflow-x: scroll;
-      overflow-y: hidden;
-    }
-
-    canvas {
-      background: #222;
-      border: 1px solid #555;
+      overflow: auto;
+      background-color: #02040a;
+      background-image:
+        radial-gradient(1px 1px at 20px 30px, white 90%, transparent),
+        radial-gradient(1px 1px at 80px 120px, white 90%, transparent),
+        radial-gradient(1px 1px at 140px 60px, white 90%, transparent),
+        radial-gradient(1px 1px at 200px 180px, white 90%, transparent),
+        radial-gradient(2px 2px at 50px 200px, #ccc 90%, transparent),
+        radial-gradient(1px 1px at 170px 90px, #aaa 90%, transparent);
+      background-size: 240px 240px;
+      background-repeat: repeat;
+      min-height: 300vh;
+      padding-top: 100vh;
+      position: relative;
     }
 
     #bola {
@@ -25,42 +37,198 @@
       height: 40px;
       border-radius: 50%;
       position: absolute;
+      box-shadow: rgb(255, 39, 39) 0px 0px 15px;
+    }
+
+    h2 {
+      position: fixed;
+      top: 5px;
+      left: 10px;
+      margin: 0;
+      font-size: 1.5rem;
+      z-index: 100;
+    }
+
+    #controles {
+      position: fixed;
+      top: 50px;
+      left: 10px;
+      background-color: rgba(248, 248, 255, 0.15);
+      border: 1px solid grey;
+      padding: 10px;
+      border-radius: 5px;
+      max-width: 300px;
+      width: calc(100% - 20px);
+      z-index: 100;
+    }
+
+    #controles label {
+      display: block;
+      margin-top: 8px;
+      margin-bottom: 3px;
+      font-size: 0.9rem;
+    }
+
+    #controles input[type="text"],
+    #controles input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 5px;
+      border-radius: 4px;
+      border: 1px solid #555;
+      background: #333;
+      color: white;
+      font-size: 1rem;
+    }
+
+    #controles input[type="button"] {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background-color: #ff4444;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #controles input[type="button"]:active {
+      background-color: #cc0000;
     }
 
     #info {
-      margin-top: 20px;
+      position: fixed;
+      top: 10px;
+      right: 10px;
       background-color: rgba(248, 248, 255, 0.15);
       border: 1px solid grey;
       padding: 10px;
       border-radius: 5px;
       width: auto;
-      max-width: 300px;
+      max-width: 250px;
+      font-size: 0.85rem;
+      z-index: 100;
     }
 
     #info p {
-      margin: 0;
+      margin: 3px 0;
     }
 
     #info span {
       font-weight: bold;
+    }
+
+    /* Media queries para tablets */
+    @media (max-width: 768px) {
+      h2 {
+        font-size: 1.3rem;
+      }
+
+      #controles {
+        max-width: 280px;
+      }
+
+      #info {
+        max-width: 200px;
+        font-size: 0.75rem;
+        padding: 8px;
+      }
+    }
+
+    /* Media queries para móviles */
+    @media (max-width: 480px) {
+      h2 {
+        font-size: 1.1rem;
+        top: 3px;
+        left: 5px;
+      }
+
+      #controles {
+        top: 35px;
+        left: 5px;
+        right: 5px;
+        width: calc(100% - 10px);
+        max-width: none;
+        padding: 8px;
+      }
+
+      #controles label {
+        font-size: 0.85rem;
+        margin-top: 5px;
+      }
+
+      #controles input[type="text"],
+      #controles input[type="number"] {
+        padding: 10px;
+        font-size: 0.95rem;
+      }
+
+      #controles input[type="button"] {
+        padding: 14px;
+        font-size: 1rem;
+        margin-top: 8px;
+      }
+
+      #info {
+        position: fixed;
+        bottom: 10px;
+        top: auto;
+        right: 5px;
+        max-width: calc(100% - 10px);
+        font-size: 0.7rem;
+        padding: 6px;
+      }
+
+      #info p {
+        margin: 2px 0;
+      }
+
+      #bola {
+        width: 30px;
+        height: 30px;
+      }
+    }
+
+    /* Media queries para pantallas muy pequeñas */
+    @media (max-width: 360px) {
+      h2 {
+        font-size: 1rem;
+      }
+
+      #controles label {
+        font-size: 0.8rem;
+      }
+
+      #controles input[type="text"],
+      #controles input[type="number"] {
+        padding: 8px;
+        font-size: 0.9rem;
+      }
+
+      #info {
+        font-size: 0.65rem;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <h2 style="z-index: 10; margin: 10px;">Tiro Parabólico</h2>
+  <h2>Tiro Parabólico</h2>
   <div id="bola"></div>
 
-  <div id="controles">
-    <label>Velocidad inicial</label>
-    <input type="text" id="velocidadInicial" placeholder="5 m/s">
-    <label>Ángulo</label>
-    <input type="text" placeholder="20 grados" id="angulo">
-    <label>Gravedad</label>
-    <input type="text" placeholder="9.8 m/s²" id="gravedad">
-    <input type="button" value="Shoot 🔥" id="dispararClick">
-  </div>
+  <form id="controles">
+    <label>Velocidad inicial (m/s)</label>
+    <input type="number" id="velocidadInicial" placeholder="5" min="0" step="0.1">
+    <label>Ángulo (grados)</label>
+    <input type="number" placeholder="20" id="angulo" min="0" max="90" step="1">
+    <label>Gravedad (m/s²)</label>
+    <input type="number" placeholder="9.8" id="gravedad" min="0" step="0.1">
+    <input type="button" value="Lanzar 🔥" id="dispararClick">
+  </form>
 
   <div id="info">
     <p>Velocidad inicial: <span id="velocidadInicialInfo">0</span> m/s</p>
@@ -85,7 +253,7 @@
     let velY;
     let velX;
 
-    let animId = null; // para requestAnimationFrame
+    let animId = null;
     let lastTime = null;
 
     const actualizarInfo = () => {
@@ -97,13 +265,13 @@
     };
 
     const calcularTiempoVuelo = () => {
-      const groundY = window.innerHeight - 50;
+      const sueloAbsoluto = window.innerHeight + (document.body.offsetHeight - window.innerHeight) - 50;
       const y0 = posY;
       const v0y = velY;
 
       const a = 0.5 * g;
       const b = v0y;
-      const c = y0 - groundY;
+      const c = y0 - sueloAbsoluto;
 
       const disc = b * b - 4 * a * c;
       if (disc < 0) return;
@@ -126,12 +294,14 @@
       angulo = 20 * Math.PI / 180;
       g = 9.8 * escalaMetro;
       posX = 0;
-      posY = window.innerHeight - 60;
+      const sueloAbsoluto = window.innerHeight + (document.body.offsetHeight - window.innerHeight) - 50;
+      posY = sueloAbsoluto - 10;
       velY = -Math.sin(angulo) * velH;
       velX = Math.cos(angulo) * velH;
       actualizarInfo();
       bola.style.left = posX + "px";
       bola.style.top = posY + "px";
+      window.scrollTo({ left: 0, top: posY - window.innerHeight + 100, behavior: "auto" });
     };
     valoresIniciales();
 
@@ -144,9 +314,9 @@
       posY += velY * dt;
       posX += velX * dt;
 
-      const suelo = window.innerHeight - 50;
-      if (posY >= suelo) {
-        posY = suelo;
+      const sueloAbsoluto = window.innerHeight + (document.body.offsetHeight - window.innerHeight) - 50;
+      if (posY >= sueloAbsoluto) {
+        posY = sueloAbsoluto;
         velX = 0;
         velY = 0;
         animId = null;
@@ -156,7 +326,11 @@
       actualizarInfo();
       bola.style.left = posX + "px";
       bola.style.top = posY + "px";
-
+      
+      const scrollX = Math.max(0, posX - window.innerWidth / 2);
+      const scrollY = Math.max(0, posY - window.innerHeight / 2);
+      window.scrollTo({ left: scrollX, top: scrollY, behavior: "auto" });
+      
       animId = requestAnimationFrame(mover);
     };
 
@@ -164,13 +338,16 @@
       valoresIniciales();
       lastTime = null;
 
-      const gInput = parseFloat(document.getElementById("gravedad").value);
-      const angInput = parseFloat(document.getElementById("angulo").value);
-      const velInput = parseFloat(document.getElementById("velocidadInicial").value);
+      let gInput = parseFloat(document.getElementById("gravedad").value);
+      let angInput = parseFloat(document.getElementById("angulo").value);
+      let velInput = parseFloat(document.getElementById("velocidadInicial").value);
 
-      if (!isNaN(gInput)) g = gInput * escalaMetro;
-      if (!isNaN(angInput)) angulo = angInput * Math.PI / 180;
-      if (!isNaN(velInput)) velH = velInput * escalaMetro;
+      if (!isNaN(gInput) && gInput >= 0) g = gInput * escalaMetro;
+      if (!isNaN(angInput)) {
+        angInput = Math.max(0, Math.min(90, angInput));
+        angulo = angInput * Math.PI / 180;
+      }
+      if (!isNaN(velInput) && velInput >= 0) velH = velInput * escalaMetro;
 
       velY = -Math.sin(angulo) * velH;
       velX = Math.cos(angulo) * velH;
