@@ -29,6 +29,8 @@
       min-height: 300vh;
       padding-top: 100vh;
       position: relative;
+      touch-action: none; /* Evita gestos de zoom y scroll manual mientras disparas */
+      overscroll-behavior: none; /* Evita el rebote elástico en móviles */
     }
 
     #bola {
@@ -57,8 +59,8 @@
       border: 1px solid grey;
       padding: 10px;
       border-radius: 5px;
-      max-width: 300px;
-      width: calc(100% - 20px);
+      max-width: 600px;
+      width: calc(100vw - 20px);
       z-index: 100;
     }
 
@@ -242,7 +244,7 @@
   <!-- <button id="toggle-btn" onclick="document.getElementById('controles').classList.toggle('hidden')">⚙️</button> -->
   <script>
     let bola = document.getElementById("bola");
-
+    
     let escalaMetro = 40 * 2;
 
     let velH;
@@ -256,7 +258,12 @@
     let animId = null;
     let lastTime = null;
 
-    
+    let sueloAbsoluto; // Variable global
+
+    const calcularSuelo = () => {
+        // Calculamos el suelo basado en el tamaño total del documento
+        sueloAbsoluto = document.documentElement.scrollHeight - 60;
+    };
 
     const actualizarInfo = () => {
       document.getElementById("velocidadInicialInfo").textContent = (velH / escalaMetro).toFixed(2);
@@ -292,11 +299,13 @@
     };
 
     const valoresIniciales = () => {
+      calcularSuelo();
+      document.querySelector("meta[name=viewport]").setAttribute('content', 'width=device-width, user-scalable=no, initial-scale='+(1/window.devicePixelRatio)+'');
+
       velH = 5 * escalaMetro;
       angulo = 20 * Math.PI / 180;
       g = 9.8 * escalaMetro;
       posX = 0;
-      const sueloAbsoluto = window.innerHeight + (document.body.offsetHeight - window.innerHeight) - 50;
       posY = sueloAbsoluto - 10;
       velY = -Math.sin(angulo) * velH;
       velX = Math.cos(angulo) * velH;
@@ -331,7 +340,12 @@
       
       const scrollX = Math.max(0, posX - window.innerWidth / 2);
       const scrollY = Math.max(0, posY - window.innerHeight / 2);
-      window.scrollTo({ left: scrollX, top: scrollY, behavior: "auto" });
+
+      window.scrollTo({
+          left: scrollX,
+          top: scrollY,
+          behavior: 'instant'
+      });
       
       animId = requestAnimationFrame(mover);
     };
